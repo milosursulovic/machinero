@@ -97,11 +97,29 @@ router.put("/:id", async (req, res) => {
     const updated = await Order.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
+      context: "query",
     });
     if (!updated) return res.status(404).json({ message: "Nije pronađeno." });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Greška pri izmeni." });
+  }
+});
+
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body || {};
+    if (!status) return res.status(400).json({ message: "Nedostaje status." });
+
+    const updated = await Order.findByIdAndUpdate(
+      req.params.id,
+      { "logistics.status": status },
+      { new: true, runValidators: true, context: "query" }
+    );
+    if (!updated) return res.status(404).json({ message: "Nije pronađeno." });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Greška pri izmeni statusa." });
   }
 });
 

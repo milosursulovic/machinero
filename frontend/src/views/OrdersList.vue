@@ -38,6 +38,27 @@ const statusBadge = (s) => {
   return map[s] || "bg-slate-100 text-slate-700";
 };
 
+const statusOptions = ["primljena", "u_isporuci", "isporucena", "otkazana"];
+const savingStatus = ref({});
+
+const updateOrderStatus = async (order, newStatus) => {
+  if (!newStatus || order?.logistics?.status === newStatus) return;
+  const id = order._id;
+  const prev = order.logistics?.status;
+
+  savingStatus.value[id] = true;
+  order.logistics = { ...(order.logistics || {}), status: newStatus };
+
+  try {
+    await api.patch(`/orders/${id}/status`, { status: newStatus });
+  } catch (e) {
+    order.logistics = { ...(order.logistics || {}), status: prev };
+    alert("Nije uspelo menjanje statusa.");
+  } finally {
+    savingStatus.value[id] = false;
+  }
+};
+
 const fetchOrders = async () => {
   loading.value = true;
   error.value = "";
@@ -192,13 +213,32 @@ const showingTo = computed(() =>
                 {{ o.customer?.phone }} • {{ o.customer?.email }}
               </div>
             </div>
+
             <div class="flex items-center gap-2">
               <span
                 class="text-sm px-2 py-1 rounded-lg"
                 :class="statusBadge(o.logistics?.status)"
+                title="Trenutni status"
               >
                 {{ o.logistics?.status || "—" }}
               </span>
+
+              <select
+                :value="o.logistics?.status || ''"
+                @change="updateOrderStatus(o, $event.target.value)"
+                class="border rounded-lg px-2 py-1 text-sm"
+                :disabled="savingStatus[o._id]"
+              >
+                <option disabled value="">Promeni status…</option>
+                <option v-for="s in statusOptions" :key="s" :value="s">
+                  {{ s }}
+                </option>
+              </select>
+
+              <span v-if="savingStatus[o._id]" class="text-xs text-slate-500">
+                Čuvam…
+              </span>
+
               <button
                 @click="goEdit(o._id)"
                 class="text-blue-600 hover:underline text-sm"
