@@ -49,7 +49,6 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// korisni indeksi za filter/search
 OrderSchema.index({ "logistics.status": 1, "logistics.deliveryDate": 1 });
 OrderSchema.index({ "customer.fullName": "text", "order.item": "text" });
 

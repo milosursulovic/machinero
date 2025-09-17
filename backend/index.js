@@ -15,7 +15,6 @@ app.use(cors({ origin: process.env.CORS_ORIGIN?.split(",") || "*" }));
 app.get("/", (_req, res) => res.send("CNC Orders API radi."));
 app.use("/api/orders", ordersRouter);
 
-// Konekcija na Mongo
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
