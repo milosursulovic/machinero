@@ -4,7 +4,7 @@
       <div
         class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between"
       >
-        <h1 class="text-xl font-semibold text-slate-800">CNC Orders</h1>
+        <h1 class="text-xl font-semibold text-slate-800">Machinero</h1>
         <nav class="flex gap-2">
           <RouterLink
             class="px-3 py-2 rounded-lg hover:bg-slate-100"

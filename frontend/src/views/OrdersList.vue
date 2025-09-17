@@ -110,6 +110,7 @@ watch(
 );
 
 onMounted(() => {
+  document.title = "Lista porudžbina - Machinero";
   syncFromRoute();
   fetchOrders();
 });

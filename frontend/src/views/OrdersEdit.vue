@@ -40,7 +40,10 @@ const fetchOne = async () => {
   }
 };
 
-onMounted(fetchOne);
+onMounted(() => {
+  document.title = "Izmena porudžbine - Machinero";
+  fetchOne();
+});
 
 const save = async () => {
   saving.value = true;

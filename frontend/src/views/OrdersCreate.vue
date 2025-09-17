@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { api } from "../services/api";
 
@@ -39,6 +39,10 @@ const submitForm = async () => {
     saving.value = false;
   }
 };
+
+onMounted(() => {
+  document.title = "Dodaj porudžbinu - Machinero";
+});
 </script>
 
 <template>
