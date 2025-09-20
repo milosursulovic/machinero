@@ -158,6 +158,53 @@ const showingFrom = computed(() =>
 const showingTo = computed(() =>
   Math.min(page.value * limit.value, total.value)
 );
+
+/* -------------------  NOVO: logika za URGENCY SAMO ZA 'primljena' ------------------- */
+const ALERT_DAYS = 5;
+
+const daysUntil = (dateStr) => {
+  if (!dateStr) return Infinity;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(dateStr);
+  d.setHours(0, 0, 0, 0);
+  return Math.floor((d - today) / (1000 * 60 * 60 * 24));
+};
+
+const deliveryAlertClass = (o) => {
+  if (o?.logistics?.status !== "primljena") return "";
+  const du = daysUntil(o?.logistics?.deliveryDate);
+  if (du === Infinity) return "";
+  if (du < 0) return "bg-rose-50 border-rose-200";
+  if (du <= 2) return "bg-amber-50 border-amber-200";
+  if (du <= ALERT_DAYS) return "bg-yellow-50 border-yellow-200";
+  return "";
+};
+
+const deliveryAlertChip = (o) => {
+  if (o?.logistics?.status !== "primljena") return null;
+  const du = daysUntil(o?.logistics?.deliveryDate);
+  if (du === Infinity) return null;
+  if (du < 0) {
+    return {
+      text: `Kasni ${Math.abs(du)} ${Math.abs(du) === 1 ? "dan" : "dana"}`,
+      cls: "bg-rose-200 text-rose-900",
+    };
+  }
+  if (du <= 2) {
+    return {
+      text: `VRLO HITNO: za ${du} ${du === 1 ? "dan" : "dana"}`,
+      cls: "bg-amber-200 text-amber-900",
+    };
+  }
+  if (du <= ALERT_DAYS) {
+    return {
+      text: `Uskoro: za ${du} ${du === 1 ? "dan" : "dana"}`,
+      cls: "bg-yellow-200 text-yellow-900",
+    };
+  }
+  return null;
+};
 </script>
 
 <template>
@@ -202,7 +249,8 @@ const showingTo = computed(() =>
         <div
           v-for="o in orders"
           :key="o._id"
-          class="bg-white border rounded-xl p-4 shadow-sm"
+          class="bg-white border rounded-xl p-4 shadow-sm transition-colors"
+          :class="deliveryAlertClass(o)"
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -221,6 +269,18 @@ const showingTo = computed(() =>
                 title="Trenutni status"
               >
                 {{ o.logistics?.status || "—" }}
+              </span>
+
+              <!-- Čip za rok isporuke (samo za primljene) -->
+              <span
+                v-if="deliveryAlertChip(o)"
+                class="text-xs px-2 py-1 rounded-lg"
+                :class="deliveryAlertChip(o).cls"
+                :title="`Datum isporuke: ${formatDate(
+                  o.logistics?.deliveryDate
+                )}`"
+              >
+                {{ deliveryAlertChip(o).text }}
               </span>
 
               <select
