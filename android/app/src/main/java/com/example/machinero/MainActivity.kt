@@ -1,8 +1,10 @@
 package com.example.machinero
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,7 +12,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.machinero.data.AppDatabase
+import com.example.machinero.data.NotificationEntity
 import com.example.machinero.push.NotificationUtil
+import com.example.machinero.ui.NotificationsAdapter
+import com.example.machinero.ui.OrderDetailActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.messaging.FirebaseMessaging
@@ -45,12 +53,14 @@ class MainActivity : AppCompatActivity() {
         val btnSub = findViewById<MaterialButton>(R.id.btnSubscribe)
         val btnUnsub = findViewById<MaterialButton>(R.id.btnUnsubscribe)
         val tvToken = findViewById<MaterialTextView>(R.id.tvToken)
+        val rv = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNotifications)
+        val tvEmpty = findViewById<MaterialTextView>(R.id.tvEmpty)
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener {
-            if (it.isSuccessful) {
-                tvToken.text = "FCM token:\n${it.result}"
+            tvToken.text = if (it.isSuccessful) {
+                "FCM token:\n${it.result}"
             } else {
-                tvToken.text = "Ne mogu da dobijem token: ${it.exception?.localizedMessage}"
+                "Ne mogu da dobijem token: ${it.exception?.localizedMessage}"
             }
         }
 
@@ -63,7 +73,6 @@ class MainActivity : AppCompatActivity() {
                 ).show()
             }
         }
-
         btnUnsub.setOnClickListener {
             FirebaseMessaging.getInstance().unsubscribeFromTopic(topic)
                 .addOnCompleteListener { task ->
@@ -74,6 +83,43 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
         }
+
+        val adapter = NotificationsAdapter { n -> openDetails(n) }
+        rv.layoutManager = LinearLayoutManager(this)
+        rv.adapter = adapter
+
+        val dao = AppDatabase.getInstance(this).notificationDao()
+        dao.getAllLive().observe(this, Observer { list ->
+            adapter.submitList(list)
+            tvEmpty.visibility = if (list.isNullOrEmpty()) View.VISIBLE else View.GONE
+        })
+
+        intent?.extras?.let { ex ->
+            val maybeOrderId = ex.getString("orderId")
+            if (!maybeOrderId.isNullOrBlank()) {
+                openDetailsFromExtras(ex)
+            }
+        }
+    }
+
+    private fun openDetails(n: NotificationEntity) {
+        val i = Intent(this, OrderDetailActivity::class.java).apply {
+            putExtra("_title", n.title)
+            putExtra("_body", n.body)
+            n.orderId?.let { putExtra("orderId", it) }
+            n.status?.let { putExtra("status", it) }
+            n.customer?.let { putExtra("customer", it) }
+            n.deliveryDateIso?.let { putExtra("deliveryDate", it) }
+            n.type?.let { putExtra("type", it) }
+        }
+        startActivity(i)
+    }
+
+    private fun openDetailsFromExtras(ex: Bundle) {
+        val i = Intent(this, OrderDetailActivity::class.java).apply {
+            putExtras(ex)
+        }
+        startActivity(i)
     }
 
     private fun ensureNotifPermission() {

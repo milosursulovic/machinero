@@ -12,7 +12,6 @@ if (!admin.apps.length) {
 }
 
 export const TOPIC_ALL = "orders_all";
-
 export const fcm = admin.messaging();
 
 export async function sendToTopic(
@@ -22,23 +21,26 @@ export async function sendToTopic(
     body,
     data = {},
     priority = "high",
-    channelId = "machinero_default",
     collapseKey,
     dryRun = false,
   } = {}
 ) {
-  const message = {
+  const strData = Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, v == null ? "" : String(v)])
+  );
+
+  const payload = {
     topic,
-    notification: title || body ? { title, body } : undefined,
-    data,
+    data: {
+      _title: title ?? "Obaveštenje",
+      _body: body ?? "",
+      ...strData,
+    },
     android: {
-      priority: priority.toLowerCase() === "high" ? "high" : "normal",
-      collapseKey,
-      notification: {
-        channelId,
-        priority: priority.toUpperCase(),
-      },
+      priority: String(priority).toLowerCase() === "high" ? "high" : "normal",
+      ...(collapseKey ? { collapseKey } : {}),
     },
   };
-  return fcm.send(message, dryRun);
+
+  return fcm.send(payload, dryRun);
 }

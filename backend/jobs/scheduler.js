@@ -3,7 +3,7 @@ import NotificationLog from "../models/NotificationLog.js";
 import Order from "../models/Order.js";
 import { sendToTopic, TOPIC_ALL } from "../services/fcm.js";
 
-const EVERY_N_MINUTES = 5;
+const EVERY_N_MINUTES = 2;
 const STATUS_TARGET = "primljena";
 const DAYS_AHEAD = 2;
 const FORCE_SEND_FOR_TEST = false;
