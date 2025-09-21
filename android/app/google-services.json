@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "84907470145",
+    "project_id": "machinero-b7833",
+    "storage_bucket": "machinero-b7833.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84907470145:android:8a49d1d662b9da58c485c0",
+        "android_client_info": {
+          "package_name": "com.example.machinero"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhtm6w3wmaayO0UgRWmWOKwbA_SehLjnk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
