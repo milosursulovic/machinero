@@ -29,7 +29,7 @@ function belgradeDayBounds(base = new Date()) {
 const srDate = (d) => (d ? new Date(d).toLocaleDateString("sr-RS") : "");
 const shortId = (id) => `#${String(id).slice(-6).toUpperCase()}`;
 
-function buildMessageLikeDebug(order, now = new Date()) {
+function buildMessage(order, now = new Date()) {
   const dd = order?.logistics?.deliveryDate
     ? new Date(order.logistics.deliveryDate)
     : null;
@@ -112,7 +112,7 @@ export async function scanAndNotify() {
       }
     }
 
-    const msg = buildMessageLikeDebug(o);
+    const msg = buildMessage(o);
 
     console.log("[scheduler] sending", {
       orderId: o._id,
